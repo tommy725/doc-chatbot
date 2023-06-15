@@ -1,4 +1,4 @@
-# doc-chatbot: GPT x Pinecone x LangChain
+# chatbot-based-docs
 
 ## Features
 
