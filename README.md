@@ -1,7 +1,7 @@
 # chatbot-based-docs
 
 ## Served file types
-  `.pdf`, `.docx`, `.txt`, '.csv'
+  `.pdf`, `.docx`, `.txt`, `.csv`
 
 ## Run
 - Clone the repo or download zip
