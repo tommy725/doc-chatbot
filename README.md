@@ -21,7 +21,7 @@
   `NEXTAUTH_SECRET`
     You can generate this by running `openssl rand -base64 32` in Git Bash.
   
-  `### JWT Secret`
+  `JWT_Secret`
     You can generate this by running `openssl rand -base64 32` in Git Bash.
 
 - Run the app
