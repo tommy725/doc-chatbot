@@ -5,6 +5,7 @@ import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { DocxLoader } from 'langchain/document_loaders/fs/docx';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
+import { CSVLoader } from 'langchain/document_loaders/fs/csv';
 import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import { initPinecone } from '@/utils/pinecone-client';
@@ -28,11 +29,12 @@ export default async function handler(
   const { namespaceName, chunkSize, overlapSize } = req.query;
 
   try {
-    // Load PDF files from the specified directory
+    // Load PDF, DOCS, TXT, CSV files from the specified directory
     const directoryLoader = new DirectoryLoader(filePath, {
       '.pdf': (path) => new PDFLoader(path),
       '.docx': (path) => new DocxLoader(path),
       '.txt': (path) => new TextLoader(path),
+      '.csv': (path) => new CSVLoader(path),
     });
 
     const rawDocs = await directoryLoader.load();
@@ -60,14 +62,15 @@ export default async function handler(
       textKey: 'text',
     });
 
-    // Delete the PDF, DOCX and TXT files
+    // Delete the PDF, DOCX, TXT, CSV files
     const filesToDelete = fs
       .readdirSync(filePath)
       .filter(
         (file) =>
           file.endsWith('.pdf') ||
           file.endsWith('.docx') ||
-          file.endsWith('.txt'),
+          file.endsWith('.txt') ||
+          file.endsWith('.csv'),
       );
     filesToDelete.forEach((file) => {
       fs.unlinkSync(`${filePath}/${file}`);
