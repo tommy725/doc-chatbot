@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({ setSidebarOpen }) => {
 
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6 items-center">
         <span className="flex-1 text-center items-center flex-shrink-0 rounded-md  px-2 py-1 text-xs sm:text-sm md:text-md md:text-lg font-medium text-blue-400">
-          DOC CHATBOT
+          Chat with your multiple docs
         </span>
       </div>
 
