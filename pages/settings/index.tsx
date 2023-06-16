@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { getItem, setItem } from '@/libs/localStorageKeys';
 import { useRouter } from 'next/router';
 import { useDropzone } from 'react-dropzone';
 import { useKeys } from '@/hooks';
@@ -20,6 +21,10 @@ export default function Settings() {
     pineconeApiKey,
     pineconeEnvironment,
     pineconeIndexName,
+    setOpenAIapiKey,
+    setPineconeApiKey,
+    setPineconeEnvironment,
+    setPineconeIndexName,
     handleKeyChange,
     handleSubmitKeys,
   } = useKeys();
@@ -82,6 +87,13 @@ export default function Settings() {
   useEffect(() => {
     setSubmitClicked(false);
   }, [openAIapiKey, pineconeApiKey, pineconeEnvironment, pineconeIndexName]);
+
+  useEffect(() => {
+    setOpenAIapiKey(getItem('openAIapiKey') || '');
+    setPineconeApiKey(getItem('pineconeApiKey') || '');
+    setPineconeEnvironment(getItem('pineconeEnvironment') || '');
+    setPineconeIndexName(getItem('pineconeIndexName') || '');
+  })
 
   const handleDelete = async (namespace: string) => {
     try {

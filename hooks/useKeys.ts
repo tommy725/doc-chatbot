@@ -15,12 +15,7 @@ interface Keys {
 }
 
 const useKeys = (): Keys => {
-  const [keys, setKeys] = useState({
-    openAIapiKey: getItem('openAIapiKey') || '',
-    pineconeApiKey: getItem('pineconeApiKey') || '',
-    pineconeEnvironment: getItem('pineconeEnvironment') || '',
-    pineconeIndexName: getItem('pineconeIndexName') || '',
-  });
+  const [keys, setKeys] = useState();
 
   const setKey = (keyName: string, keyValue: string) => {
     setKeys((prev) => ({ ...prev, [keyName]: keyValue }));
