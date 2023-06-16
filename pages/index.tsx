@@ -167,10 +167,6 @@ export default function Home() {
     pineconeIndexName,
   ]);
 
-  useEffect(() => {
-    textAreaRef.current?.focus();
-  }, []);
-
   async function handleSubmit(e: any) {
     e.preventDefault();
     setError(null);

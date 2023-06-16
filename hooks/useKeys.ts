@@ -15,7 +15,12 @@ interface Keys {
 }
 
 const useKeys = (): Keys => {
-  const [keys, setKeys] = useState();
+  const [keys, setKeys] = useState({
+    openAIapiKey: getItem('openAIapiKey') || '',
+    pineconeApiKey: getItem('pineconeApiKey') || '',
+    pineconeEnvironment: getItem('pineconeEnvironment') || '',
+    pineconeIndexName: getItem('pineconeIndexName') || ''
+  });
 
   const setKey = (keyName: string, keyValue: string) => {
     setKeys((prev) => ({ ...prev, [keyName]: keyValue }));
@@ -34,8 +39,10 @@ const useKeys = (): Keys => {
   };
 
   const handleSubmitKeys = () => {
-    for (const [storageKey, keyValue] of Object.entries(keys)) {
-      handleKeyChange(storageKey, keyValue);
+    if (keys) {
+      for (const [storageKey, keyValue] of Object.entries(keys)) {
+        handleKeyChange(storageKey, keyValue);
+      }
     }
   };
 

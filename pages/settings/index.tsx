@@ -35,6 +35,7 @@ export default function Settings() {
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [uploadMessage, setUploadMessage] = useState<string>('');
+  const [uploadStatus, setUploadStatus] = useState(false);
   const [error, setError] = useState<{ message: string; customString: string }>(
     {
       message: '',
@@ -42,6 +43,7 @@ export default function Settings() {
     },
   );
   const [namespaces, setNamespaces] = useState<string[]>([]);
+  const [ingestErrorMessage, setIngestErrorMessage] = useState<string>('');
   const [chunkSize, setChunkSize] = useState<number>(1200);
   const [overlapSize, setOverlapSize] = useState<number>(20);
   const [selectedNamespace, setSelectedNamespace] = useState<string>('');
@@ -50,7 +52,7 @@ export default function Settings() {
     useState<boolean>(false);
   const router = useRouter();
 
-  const fetchNamespaces = useCallback(async () => {
+  const fetchNamespaces = async (openAIapiKey: string, pineconeApiKey: string, pineconeEnvironment: string, pineconeIndexName: str) => {
     try {
       const response = await fetch(`/api/getNamespaces`, {
         headers: {
@@ -62,38 +64,57 @@ export default function Settings() {
       const data = await response.json();
 
       if (response.ok) {
+        handleSubmitKeys();
+        setSubmitClicked(true);
         setNamespaces(data);
         setError({
           customString: '',
           message: '',
         });
       } else {
+        setSubmitClicked(false);
+        setNamespaces([]);
         setError(data.error);
       }
     } catch (error: any) {
+      console.log(error);
+      setSubmitClicked(false);
+      setNamespaces([]);
       setError({
         message: error.message,
         customString: 'An error occured while fetching namespaces',
       });
     }
-  }, [pineconeApiKey, pineconeEnvironment, pineconeIndexName]);
+  };
+
+  const handleSubmit = () => {
+    setIngestErrorMessage('');
+    fetchNamespaces(openAIapiKey, pineconeApiKey, pineconeEnvironment, pineconeIndexName);
+  }
 
   useEffect(() => {
-    if (submitClicked) {
-      fetchNamespaces();
-    }
-  }, [fetchNamespaces, submitClicked]);
-
-  useEffect(() => {
+    setError({
+      customString: '',
+      message: '',
+    });
     setSubmitClicked(false);
   }, [openAIapiKey, pineconeApiKey, pineconeEnvironment, pineconeIndexName]);
 
   useEffect(() => {
-    setOpenAIapiKey(getItem('openAIapiKey') || '');
-    setPineconeApiKey(getItem('pineconeApiKey') || '');
-    setPineconeEnvironment(getItem('pineconeEnvironment') || '');
-    setPineconeIndexName(getItem('pineconeIndexName') || '');
-  })
+    const openAIapiKey = getItem('openAIapiKey') || '';
+    const pineconeApiKey = getItem('pineconeApiKey') || '';
+    const pineconeEnvironment = getItem('pineconeEnvironment') || '';
+    const pineconeIndexName = getItem('pineconeIndexName') || '';
+
+    setOpenAIapiKey(openAIapiKey);
+    setPineconeApiKey(pineconeApiKey);
+    setPineconeEnvironment(pineconeEnvironment);
+    setPineconeIndexName(pineconeIndexName);
+
+    if(openAIapiKey && pineconeApiKey && pineconeEnvironment && pineconeIndexName) {
+      fetchNamespaces(openAIapiKey, pineconeApiKey, pineconeEnvironment, pineconeIndexName);
+    }
+  }, [])
 
   const handleDelete = async (namespace: string) => {
     try {
@@ -132,6 +153,10 @@ export default function Settings() {
     noClick: true,
     noKeyboard: true,
     onDrop: (acceptedFiles: File[]) => {
+      setNamespaceName('');
+      setUploadStatus(false);
+      setUploadMessage('');
+      setIngestErrorMessage('');
       setSelectedFiles(acceptedFiles);
     },
     multiple: true,
@@ -146,18 +171,24 @@ export default function Settings() {
     }
 
     try {
+      setUploadMessage('Uploading...');
+      setUploadStatus(false);
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
 
       if (response.ok) {
+        setUploadStatus(true);
         setUploadMessage('Files uploaded successfully!');
       } else {
+        setUploadMessage('');
         const errorData = await response.json();
         setError(errorData.error);
       }
     } catch (error: any) {
+      setUploadStatus(true);
+      setUploadMessage('');
       setError({
         message: error.message,
         customString: 'An error occured trying to upload files',
@@ -166,6 +197,12 @@ export default function Settings() {
   };
 
   const handleIngest = async () => {
+
+    if (!submitClicked) {
+      setIngestErrorMessage('Please submit keys.');
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -189,16 +226,15 @@ export default function Settings() {
         setTimeout(() => {
           // setMessage('');
         }, 1000);
-        fetchNamespaces();
+        fetchNamespaces(openAIapiKey, pineconeApiKey, pineconeEnvironment, pineconeIndexName);
       } else {
         const errorData = await response.json();
-        setError(errorData.error);
+        console.log(errorData);
+        setIngestErrorMessage(errorData.error);
       }
     } catch (error: any) {
-      setError({
-        message: error.message,
-        customString: 'Error ingesting files',
-      });
+      console.log(error);
+      setIngestErrorMessage('Error ingesting files');
     }
 
     setLoading(false);
@@ -207,9 +243,13 @@ export default function Settings() {
   return (
     <div className="relative isolate min-h-screen bg-gray-900">
       <div className="mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-2">
-        <div className="relative px-6 pb-20 pt-24 sm:pt-32 lg:static lg:px-8 lg:py-48">
+        <div className="relative px-6 pb-20 pt-8 sm:pt-16 lg:static lg:px-8 lg:py-24">
           <div className="mx-auto max-w-xl lg:mx-0 lg:max-w-lg">
             <Pattern />
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              {' '}
+              Setting infos
+            </h2>
             {error && (
               <div className="mt-4 sm:mt-8 flex justify-center mb-4">
                 <div className="text-red-500 text-sm sm:text-base font-semibold">
@@ -256,10 +296,7 @@ export default function Settings() {
                   <button
                     type="button"
                     className="rounded-md text-white mb-6 mx-auto items-center align-center justify-between flex px-4 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold focus-visible:outline-indigo-500 shadow-sm ring-1 ring-inset bg-indigo-500 hover:bg-indigo-400"
-                    onClick={() => {
-                      handleSubmitKeys();
-                      setSubmitClicked(true);
-                    }}
+                    onClick={ handleSubmit }
                   >
                     {submitClicked ? (
                       <>
@@ -343,7 +380,8 @@ export default function Settings() {
           </div>
         </div>
         {/* ------------------------------- */}
-        <div className="px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:py-48">
+        {/* <div className="px-6 pb-20 pt-8 sm:pt-16 lg:static lg:px-8 lg:py-24"> */}
+        <div className="px-6 pb-24 pt-8 sm:pb-32 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-xl lg:mr-0 lg:max-w-lg ">
             {/* upload area */}
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
@@ -355,6 +393,19 @@ export default function Settings() {
               Treat namespaces like topics of conversation. You can create as
               many as you like, and they can be used to organize your data.
             </p>
+
+            <h2 className="text-2xl sm:mt-3 text-sm sm:text-lg leading-6 sm:leading-8  font-bold tracking-tight text-white">
+              {' '}
+              Follow these steps to start chatting
+            </h2>
+            <h2 className="text-2xl sm:mt-1 text-sm sm:text-lg leading-6 sm:leading-8 tracking-tight text-gray-300">
+              {' '}
+              1. Submit setting infos.<br></br>
+              2. Upload documents(PDF, DOCX, CSV, TXT).<br></br>
+              3. Input namespace name.<br></br>
+              4. Ingest.<br></br>
+              5. Start chatting.
+            </h2>
 
             <div
               className="mt-4 sm:mt-8 flex justify-center"
@@ -398,7 +449,7 @@ export default function Settings() {
                 {uploadMessage ? uploadMessage : 'Upload files'}
               </button>
             </div>
-            <div>
+            {/* <div>
               <div className="flex items-center">
                 <label
                   htmlFor="chunkSize"
@@ -425,9 +476,9 @@ export default function Settings() {
 
                 <div className="text-center text-gray-100">{chunkSize}</div>
               </div>
-            </div>
+            </div> */}
 
-            <ChunkSizeModal
+            {/* <ChunkSizeModal
               open={showChunkSizeModal}
               setOpen={setShowChunkSizeModal}
             />
@@ -461,9 +512,9 @@ export default function Settings() {
             <OverlapSizeModal
               open={showOverlapSizeModal}
               setOpen={setShowOverlapSizeModal}
-            />
+            /> */}
 
-            {uploadMessage && (
+            {uploadStatus && (
               <div className="mt-4 sm:mt-8 grid grid-cols-1 gap-x-4 sm:gap-x-8 gap-y-4 sm:gap-y-6 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label
@@ -478,20 +529,34 @@ export default function Settings() {
                       type="text"
                       className="block w-full rounded-md border-0 bg-white/5 px-2 sm:px-3.5 py-1.5 sm:py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-sm sm:text-base sm:leading-6 opacity-50"
                       value={namespaceName}
-                      onChange={(e) => setNamespaceName(e.target.value)}
+                      onChange={(e) => {
+                        setIngestErrorMessage('');
+                        setNamespaceName(e.target.value);
+                      }}
                     />
                   </div>
                 </div>
               </div>
             )}
+            
             {namespaceName && (
-              <div className="mt-4 sm:mt-8 flex justify-end">
-                <button
-                  className="rounded-md bg-indigo-500 px-2.5 sm:px-3.5 py-1.5 sm:py-2.5 text-center text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-                  onClick={handleIngest}
-                >
-                  {loading ? 'Ingesting...' : message ? message : 'Ingest'}
-                </button>
+              <div>
+                <div className="mt-4 sm:mt-8 flex justify-end">
+                  <button
+                    className="rounded-md bg-indigo-500 px-2.5 sm:px-3.5 py-1.5 sm:py-2.5 text-center text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                    onClick={handleIngest}
+                  >
+                    {loading ? 'Ingesting...' : message ? message : 'Ingest'}
+                  </button>
+                </div>
+
+                {ingestErrorMessage && (
+                  <div className="mt-2 sm:mt-4 flex justify-end mb-4">
+                    <div className="text-red-500 text-sm sm:text-base font-semibold">
+                      {ingestErrorMessage}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

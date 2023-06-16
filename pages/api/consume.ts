@@ -79,6 +79,10 @@ export default async function handler(
     res.status(200).json({ message: 'Data ingestion complete' });
   } catch (error) {
     console.log('error', error);
-    res.status(500).json({ error: 'Failed to ingest your data' });
+    if (error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Failed ingestion" });
+    }
   }
 }
