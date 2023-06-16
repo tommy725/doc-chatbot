@@ -55,10 +55,10 @@ const SidebarList: React.FC<SidebarListProps> = ({
               setReturnSourceDocuments={setReturnSourceDocuments}
             />
 
-            <ModelTemperature
+            {/* <ModelTemperature
               modelTemperature={modelTemperature}
               setModelTemperature={setModelTemperature}
-            />
+            /> */}
 
             <Button
               buttonType="primary"
