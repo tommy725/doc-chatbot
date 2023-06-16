@@ -17,17 +17,14 @@ import KeyForm from '@/components/keyform/KeyForm';
 export default function Settings() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const {
-    openAIapiKey,
-    pineconeApiKey,
-    pineconeEnvironment,
-    pineconeIndexName,
-    setOpenAIapiKey,
-    setPineconeApiKey,
-    setPineconeEnvironment,
-    setPineconeIndexName,
     handleKeyChange,
     handleSubmitKeys,
   } = useKeys();
+
+  const [openAIapiKey, setOpenAIapiKey] = useState<string>('');
+  const [pineconeApiKey, setPineconeApiKey] = useState<string>('');
+  const [pineconeEnvironment, setPineconeEnvironment] = useState<string>('');
+  const [pineconeIndexName, setPineconeIndexName] = useState<string>('');
 
   const [submitClicked, setSubmitClicked] = useState(false);
   const [namespaceName, setNamespaceName] = useState<string>('');
@@ -222,6 +219,7 @@ export default function Settings() {
       if (response.ok) {
         const data = await response.json();
         setMessage(data.message);
+        setIngestErrorMessage('');
 
         setTimeout(() => {
           // setMessage('');
@@ -230,11 +228,19 @@ export default function Settings() {
       } else {
         const errorData = await response.json();
         console.log(errorData);
+        
         setIngestErrorMessage(errorData.error);
+        setUploadMessage('');
+        setUploadStatus(false);
+        setNamespaceName('');
       }
     } catch (error: any) {
       console.log(error);
+      
       setIngestErrorMessage('Error ingesting files');
+      setNamespaceName('');
+      setUploadMessage('');
+      setUploadStatus(false);
     }
 
     setLoading(false);
@@ -549,14 +555,14 @@ export default function Settings() {
                     {loading ? 'Ingesting...' : message ? message : 'Ingest'}
                   </button>
                 </div>
+              </div>
+            )}
 
-                {ingestErrorMessage && (
-                  <div className="mt-2 sm:mt-4 flex justify-end mb-4">
-                    <div className="text-red-500 text-sm sm:text-base font-semibold">
-                      {ingestErrorMessage}
-                    </div>
-                  </div>
-                )}
+            {ingestErrorMessage && (
+              <div className="mt-2 sm:mt-4 flex justify-end mb-4">
+                <div className="text-red-500 text-sm sm:text-base font-semibold">
+                  {ingestErrorMessage}
+                </div>
               </div>
             )}
           </div>

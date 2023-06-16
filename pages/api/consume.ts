@@ -79,10 +79,25 @@ export default async function handler(
     res.status(200).json({ message: 'Data ingestion complete' });
   } catch (error) {
     console.log('error', error);
+
+    // Delete the PDF, DOCX, TXT, CSV files
+    const filesToDelete = fs
+      .readdirSync(filePath)
+      .filter(
+        (file) =>
+          file.endsWith('.pdf') ||
+          file.endsWith('.docx') ||
+          file.endsWith('.txt') ||
+          file.endsWith('.csv'),
+      );
+    filesToDelete.forEach((file) => {
+      fs.unlinkSync(`${filePath}/${file}`);
+    });
+
     if (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message + ". Please check files again" });
     } else {
-      res.status(500).json({ error: "Failed ingestion" });
+      res.status(500).json({ error: "Failed ingestion. Please check files again." });
     }
   }
 }

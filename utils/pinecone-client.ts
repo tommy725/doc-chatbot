@@ -4,9 +4,6 @@ export async function initPinecone(apiKey: string, environment: string) {
   try {
     const pinecone = new PineconeClient();
 
-    console.log(environment);
-    console.log(apiKey);
-
     await pinecone.init({
       environment: environment,
       apiKey: apiKey,

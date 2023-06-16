@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getItem, setItem } from '@/libs/localStorageKeys';
 
 interface Keys {
