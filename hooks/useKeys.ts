@@ -39,10 +39,8 @@ const useKeys = (): Keys => {
   };
 
   const handleSubmitKeys = () => {
-    if (keys) {
-      for (const [storageKey, keyValue] of Object.entries(keys)) {
-        handleKeyChange(storageKey, keyValue);
-      }
+    for (const [storageKey, keyValue] of Object.entries(keys)) {
+      handleKeyChange(storageKey, keyValue);
     }
   };
 

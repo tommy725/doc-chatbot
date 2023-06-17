@@ -84,6 +84,28 @@ export default function Settings() {
     }
   };
 
+  const onKeyChange = (storageKey, keyValue) => {
+    switch(storageKey) {
+      case "openAIapiKey":
+        setOpenAIapiKey(keyValue);
+        break
+
+      case "pineconeApiKey":
+        setPineconeApiKey(keyValue);
+        break
+
+      case "pineconeEnvironment":
+        setPineconeEnvironment(keyValue);
+        break
+
+      case "pineconeIndexName":
+        setPineconeIndexName(keyValue);
+        break
+    }
+
+    handleKeyChange(storageKey, keyValue);
+  }
+
   const handleSubmit = () => {
     setIngestErrorMessage('');
     fetchNamespaces(openAIapiKey, pineconeApiKey, pineconeEnvironment, pineconeIndexName);
@@ -270,28 +292,28 @@ export default function Settings() {
                   keyName="OpenAI API Key"
                   keyValue={openAIapiKey}
                   setKeyValue={(key: string) =>
-                    handleKeyChange('openAIapiKey', key)
+                    onKeyChange('openAIapiKey', key)
                   }
                 />
                 <KeyForm
                   keyName="Pinecone API Key"
                   keyValue={pineconeApiKey}
                   setKeyValue={(key: string) =>
-                    handleKeyChange('pineconeApiKey', key)
+                    onKeyChange('pineconeApiKey', key)
                   }
                 />
                 <KeyForm
                   keyName="Pinecone environment"
                   keyValue={pineconeEnvironment}
                   setKeyValue={(key: string) =>
-                    handleKeyChange('pineconeEnvironment', key)
+                    onKeyChange('pineconeEnvironment', key)
                   }
                 />
                 <KeyForm
                   keyName="Pinecone index name"
                   keyValue={pineconeIndexName}
                   setKeyValue={(key: string) =>
-                    handleKeyChange('pineconeIndexName', key)
+                    onKeyChange('pineconeIndexName', key)
                   }
                 />
               </div>
