@@ -26,3 +26,7 @@
 
 - Run the app
     `npm run dev`
+
+## Crate Docker image
+- Build: `docker build -t <your-image-name> .`
+- Run: `docker run -p 3000:3000 <your-image-name>`
