@@ -12,7 +12,7 @@
     `npm install`
 - Set up your `.env` file
     
-  ```  
+  ```   
   NEXTAUTH_SECRET=
   JWT_SECRET=
   NODE_ENV=development
